@@ -32,17 +32,28 @@ class Server:
     __ip = ""
     __port = -1
     __s = None
+    conn = None
+    addr = None
 
     def __init__(self):
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # PUBLIC METHODS
+    def connection_active(self):
+        """ Veic darbības, kamēr savienojums ir aktīvs. """
+        with self.conn:
+            print("Serverim ir pieslēdzies klients {}".format(self.addr))
+            self.test_echo_receive()
+
     def connection_close(self):
+        """ Pārtrauc savienojumu. """
         self.__close()
 
     def connection_start(self):
+        """ Uzsāk savienojumu ar internetu, gaida, kad kāds pieslēgsies. """
         self.__bind()
         self.__listen()
+        self.__accept_connection()
 
     def initialize_server(self):
         """ Veic darbības, kas sagatavo serveri palaišanai. """
@@ -57,10 +68,20 @@ class Server:
         """ Izdrukā uz ekrāna datora IP adresi un portu. """
         print("Šī servera IP adrese ir: {}:{}".format(self.__ip, self.__port))
 
+    # METODES TESTĒŠANAI
     def test_echo_receive(self):
-        pass
+        """ Servera atbalss tests. """
+        while True:
+            data = self.conn.recv(1024)
+            if not data:
+                break
+            self.conn.sendall(data)
 
     # PRIVATE METHODS
+    def __accept_connection(self) -> tuple:
+        """ Izveido savienojumu ar klientu un parāda paziņojumu. """
+        self.conn, self.addr = self.__s.accept()
+
     def __bind(self):
         """ Piesaista IP adresi un portu 'Socket' objektam. """
         try:
@@ -72,6 +93,7 @@ class Server:
             print(e)
 
     def __close(self):
+        """ Aizver savienojumu. """
         self.__s.close()
         print("Savienojums ir aizvērts.")
 
@@ -109,4 +131,5 @@ class Server:
 server = Server()
 server.initialize_server()
 server.connection_start()
+server.connection_active()
 server.connection_close()
