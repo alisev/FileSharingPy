@@ -29,17 +29,21 @@ MAX_PORT = 65535
 
 class Server:
     """ Klases mainīgie inicializēti ar sākuma vērtībām. """
+    addr = None
+    conn = None
     __ip = ""
     __port = -1
     __s = None
-    conn = None
-    addr = None
-
+       
     def __init__(self):
         self.__s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.initialize_server()
+        self.connection_start()
+        self.connection_active()
+        self.connection_close()
 
     # PUBLIC METHODS
-    def connection_active(self):
+    def connection_active(self, func):
         """ Veic darbības, kamēr savienojums ir aktīvs. """
         with self.conn:
             print("Serverim ir pieslēdzies klients {}".format(self.addr))
@@ -60,13 +64,11 @@ class Server:
         self.__select_port()
         self.__get_my_ip()
         self.show_my_ip()
-
-    def send_confirmation(self):
-        pass
-
+        
     def show_my_ip(self):
         """ Izdrukā uz ekrāna datora IP adresi un portu. """
         print("Šī servera IP adrese ir: {}:{}".format(self.__ip, self.__port))
+
 
     # METODES TESTĒŠANAI
     def test_echo_receive(self):
@@ -76,6 +78,7 @@ class Server:
             if not data:
                 break
             self.conn.sendall(data)
+
 
     # PRIVATE METHODS
     def __accept_connection(self) -> tuple:
@@ -109,9 +112,9 @@ class Server:
         return False
 
     def __listen(self):
-        """ Klausās ienākošos savienojumus """
-        self.__s.listen()
+        """ Klausās ienākošos savienojumus. """
         print("Gaida ienākošus savienojumus...")
+        self.__s.listen()
 
     def __select_port(self) -> int:
         """ Iestata servera portu. """
@@ -128,8 +131,9 @@ class Server:
                 print(e)
         self.__port = port
 
+    def __send_confirmation(self):
+        """ Nosūta klientam paziņojumu, ka savienojums ir izveidots. """
+        msg = "Serveris: Savienojums ir veiksmīgi izveidots!"
+        self.conn.send_all(msg)
+
 server = Server()
-server.initialize_server()
-server.connection_start()
-server.connection_active()
-server.connection_close()
