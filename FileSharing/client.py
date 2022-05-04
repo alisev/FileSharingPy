@@ -21,5 +21,7 @@ class Client:
         pass
     def receive_confirmation():
         pass
+    def test_echo_send():
+        pass
 
 client = Client()
